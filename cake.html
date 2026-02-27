@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --cake-tier: #1c1917; /* Elegant dark stone/chocolate */
+            --gold-accent: #d4af37;
+            --gold-light: #fbeaba;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            background-image: radial-gradient(circle at top center, #1a1a1a 0%, #000000 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Ensures cake stays at top */
+            padding-top: 2rem;
+            overflow-x: hidden; /* Prevent horizontal scrolling on mobile */
+            overflow-y: auto; /* Allow vertical scrolling for quote/countdown */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Header Animation */
+        .title-container {
+            transition: opacity 1s ease, height 1s ease, margin 1s ease;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .title-hidden {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Elegant 3-Tier Cake Styling */
+        .cake-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 2rem;
+            z-index: 10;
+            transition: transform 1s ease;
+        }
+
+        .tier {
+            position: relative;
+            background: linear-gradient(to right, #292524, #1c1917, #292524);
+            border-top: 2px solid rgba(255,255,255,0.1);
+            border-radius: 6px 6px 2px 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+
+        .tier::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #b8860b, var(--gold-accent), #b8860b);
+            border-radius: 0 0 2px 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Responsive Tier Widths */
+        .tier-1 { max-width: 280px; width: 85vw; height: 90px; z-index: 1; margin-top: -5px; }
+        .tier-2 { max-width: 200px; width: 65vw; height: 80px; z-index: 2; margin-top: -5px; }
+        .tier-3 { max-width: 130px; width: 45vw; height: 70px; z-index: 3; }
+
+        /* Candle & Flame */
+        .candle-wrapper {
+            position: relative;
+            z-index: 20;
+            margin-bottom: -2px;
+        }
+
+        .candle {
+            width: 12px;
+            height: 60px;
+            background: linear-gradient(to right, #e5e5e5, #ffffff, #d4d4d4);
+            border-radius: 4px;
+            position: relative;
+            box-shadow: inset -2px 0 4px rgba(0,0,0,0.2), 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Elegant gold stripe on candle */
+        .candle::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 5px,
+                rgba(212, 175, 55, 0.4) 5px,
+                rgba(212, 175, 55, 0.4) 10px
+            );
+        }
+
+        .wick {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 8px;
+            background: #222;
+        }
+
+        .flame {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 28px;
+            background: #ffb400;
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            box-shadow: 0 0 20px #ffb400, 0 0 60px #ffdf00, 0 0 100px rgba(255, 200, 0, 0.6);
+            animation: flicker 0.1s infinite alternate;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .flame-glow {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255,220,100,0.15) 0%, rgba(255,220,100,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .flame.off {
+            opacity: 0;
+            transform: translateX(-50%) scale(0);
+            pointer-events: none;
+        }
+
+        .flame-glow.off {
+            opacity: 0;
+        }
+
+        .smoke {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            width: 3px;
+            height: 3px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); }
+            100% { transform: translateX(-50.5%) scale(1.05) rotate(2deg); box-shadow: 0 0 25px #ffb400, 0 0 65px #ffdf00, 0 0 110px rgba(255, 200, 0, 0.7); }
+        }
+
+        @keyframes rise {
+            0% { opacity: 0.8; transform: translate(-50%, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -60px) scale(5); }
+        }
+
+        .smoke-active {
+            animation: rise 2s ease-out forwards;
+        }
+
+        .plate {
+            max-width: 340px;
+            width: 95vw;
+            height: 10px;
+            background: radial-gradient(ellipse, #444, #111);
+            border-radius: 50%;
+            margin-top: -5px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+            z-index: 0;
+            border-bottom: 2px solid #333;
+        }
+
+        /* Surprise Elements Styling */
+        .fade-in-up {
+            animation: fadeInUp 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Gold Sparkles */
+        .sprinkle {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 15;
+            opacity: 0;
+            background-color: var(--gold-light);
+            box-shadow: 0 0 4px var(--gold-accent), 0 0 8px #fff;
+        }
+
+        /* UI Controls */
+        #controls-wrapper {
+            transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .controls-hidden {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            margin: 0 !important;
+            overflow: hidden;
+        }
+
+        .status-pill {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .mic-active { color: #4ade80; }
+        .mic-inactive { color: #f87171; }
+
+        button {
+            transition: all 0.2s;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Initial Title -->
+    <div id="main-title" class="title-container">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2 text-gray-200 tracking-wide drop-shadow-md px-4">Make a Wish!</h1>
+        <p class="text-sm md:text-base text-gray-400 px-4">Blow into your microphone to put out the candle.</p>
+    </div>
+
+    <!-- The Cake Always Stays Top -->
+    <div class="cake-container" id="cakeContainer">
+        <!-- Candle -->
+        <div id="candle-wrapper" class="candle-wrapper">
+            <div class="candle">
+                <div class="wick"></div>
+            </div>
+            <div id="flame" class="flame"></div>
+            <div id="flame-glow" class="flame-glow"></div>
+            <div id="smoke" class="smoke"></div>
+        </div>
+
+        <!-- Elegant 3-Tier Cake -->
+        <div class="tier tier-3"></div>
+        <div class="tier tier-2"></div>
+        <div class="tier tier-1"></div>
+        
+        <div class="plate"></div>
+    </div>
+
+    <!-- UI Controls -->
+    <div id="controls-wrapper" class="mt-12 mb-8">
+        <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-3 px-6 md:px-8 rounded-full shadow-lg flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" />
+            </svg>
+            Enable Microphone
+        </button>
+        
+        <div id="status" class="status-pill mic-inactive">
+            Microphone: Off
+        </div>
+
+        <div id="volumeBarContainer" class="mt-4 w-48 h-2 bg-gray-800 rounded-full overflow-hidden opacity-0 transition-opacity duration-500">
+            <div id="volumeBar" class="h-full bg-yellow-500 w-0 transition-all duration-75"></div>
+        </div>
+    </div>
+
+    <!-- Sequence Container (Flows normally below cake) -->
+    <div id="sequence-container" class="flex flex-col items-center w-full max-w-3xl px-6 pb-16 z-50">
+        
+        <!-- 1. Happy Birthday Heading -->
+        <h2 id="happy-birthday" class="hidden text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-500 to-yellow-300 drop-shadow-[0_2px_10px_rgba(212,175,55,0.3)] text-center mt-6 mb-4">
+            Happy Birthday, THARU.
+        </h2>
+
+        <!-- 2. Quote -->
+        <div id="quote-text" class="hidden text-base md:text-lg lg:text-xl text-gray-300 font-serif leading-loose italic drop-shadow-md text-center mt-4">
+            <p>“I slipped this time, buddy.</p>
+            <p>But I learn from my mistakes.</p>
+            <p>Next time, I won’t just remember —</p>
+            <p>I’ll be the first one to wish you.</p>
+            <p>Because friendship isn’t about being first,</p>
+            <p>it’s about being constant.</p>
+            <p>And I’ll always stand with you.”</p>
+        </div>
+
+        <!-- 3. Countdown Container -->
+        <div id="countdown-container" class="hidden w-full mt-10 bg-black/60 p-4 md:p-6 rounded-2xl backdrop-blur-md border border-gray-800 shadow-[0_0_40px_rgba(212,175,55,0.1)]">
+            <h3 class="text-lg md:text-xl text-yellow-500 mb-4 text-center font-medium tracking-wide">Countdown to Next Birthday (Feb 19, 2027)</h3>
+            <div id="timer" class="text-2xl md:text-4xl font-mono text-white flex gap-3 md:gap-8 justify-center">
+                <!-- Timer dynamically injected here -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const flame = document.getElementById('flame');
+        const flameGlow = document.getElementById('flame-glow');
+        const smoke = document.getElementById('smoke');
+        const startBtn = document.getElementById('startBtn');
+        const statusDiv = document.getElementById('status');
+        const volumeBar = document.getElementById('volumeBar');
+        const volumeBarContainer = document.getElementById('volumeBarContainer');
+        const mainTitle = document.getElementById('main-title');
+        const controlsWrapper = document.getElementById('controls-wrapper');
+        const cakeContainer = document.getElementById('cakeContainer');
+        
+        // Sequence Elements
+        const happyBirthdayText = document.getElementById('happy-birthday');
+        const quoteText = document.getElementById('quote-text');
+        const countdownContainer = document.getElementById('countdown-container');
+
+        let audioContext;
+        let analyser;
+        let microphone;
+        let isCandleLit = true;
+        let countdownInterval;
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                setupAudio(stream);
+                
+                startBtn.style.display = 'none';
+                volumeBarContainer.classList.remove('opacity-0');
+                statusDiv.innerHTML = 'Microphone: <span class="mic-active">Listening...</span>';
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                statusDiv.innerHTML = '<span class="mic-inactive">Error: Mic access denied</span>';
+            }
+        });
+
+        function setupAudio(stream) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            microphone = audioContext.createMediaStreamSource(stream);
+            analyser.smoothingTimeConstant = 0.3;
+            analyser.fftSize = 1024;
+
+            microphone.connect(analyser);
+
+            const checkVolume = () => {
+                if (!isCandleLit) return; 
+
+                const array = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(array);
+                
+                let values = 0;
+                for (let i = 0; i < array.length; i++) {
+                    values += array[i];
+                }
+
+                const average = values / array.length;
+                
+                volumeBar.style.width = Math.min(100, average * 2) + '%';
+
+                // Threshold for "blowing"
+                if (average > 45) {
+                    extinguishCandle();
+                }
+
+                requestAnimationFrame(checkVolume);
+            };
+
+            checkVolume();
+        }
+
+        function decorateCake() {
+            // Elegant gold sparkles decorating the tiers
+            const tiers = document.querySelectorAll('.tier');
+            
+            tiers.forEach(tier => {
+                for(let i = 0; i < 20; i++) {
+                    const sprinkle = document.createElement('div');
+                    sprinkle.className = 'sprinkle';
+                    
+                    // Varying sizes for gold dust effect
+                    const size = Math.random() * 3 + 1;
+                    sprinkle.style.width = size + 'px';
+                    sprinkle.style.height = size + 'px';
+                    
+                    const maxTop = tier.offsetHeight - 15;
+                    const minTop = 5; 
+                    sprinkle.style.top = (Math.random() * (maxTop - minTop) + minTop) + 'px';
+                    sprinkle.style.left = (Math.random() * (tier.offsetWidth - 10) + 5) + 'px';
+                    
+                    sprinkle.style.transition = `opacity 0.8s ease-out ${Math.random() * 2}s, transform 0.8s ease-out ${Math.random() * 2}s`;
+                    
+                    tier.appendChild(sprinkle);
+                    
+                    // Trigger reflow to apply animation
+                    setTimeout(() => {
+                        sprinkle.style.opacity = Math.random() * 0.7 + 0.3; // Glow intensity
+                        sprinkle.style.transform = 'scale(1.5)';
+                    }, 50);
+                }
+            });
+        }
+
+        function updateCountdown() {
+            const targetDate = new Date('February 19, 2027 00:00:00').getTime();
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('timer').innerHTML = "<span class='text-yellow-400'>It's Birthday Time!</span>";
+                clearInterval(countdownInterval);
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const format = (num) => num.toString().padStart(2, '0');
+
+            document.getElementById('timer').innerHTML = `
+                <div class="flex flex-col items-center"><span class="font-bold text-gray-100 drop-shadow-md">${days}</span><span class="text-[10px] md:text-sm font-sans text-yellow-600 uppercase tracking-widest mt-1">Days</span></div>
+                <div class="flex flex-col items-center"><span class="font-bold text-gray-100 drop-shadow-md">${format(hours)}</span><span class="text-[10px] md:text-sm font-sans text-yellow-600 uppercase tracking-widest mt-1">Hrs</span></div>
+                <div class="flex flex-col items-center"><span class="font-bold text-gray-100 drop-shadow-md">${format(minutes)}</span><span class="text-[10px] md:text-sm font-sans text-yellow-600 uppercase tracking-widest mt-1">Min</span></div>
+                <div class="flex flex-col items-center"><span class="font-bold text-gray-100 drop-shadow-md">${format(seconds)}</span><span class="text-[10px] md:text-sm font-sans text-yellow-600 uppercase tracking-widest mt-1">Sec</span></div>
+            `;
+        }
+
+        function extinguishCandle() {
+            if (!isCandleLit) return;
+            isCandleLit = false;
+            
+            // 0. Extinguish Flame
+            flame.classList.add('off');
+            flameGlow.classList.add('off');
+            smoke.classList.add('smoke-active');
+            
+            // 1. Hide Top Title and UI Controls to free up space
+            mainTitle.classList.add('title-hidden');
+            controlsWrapper.classList.add('controls-hidden');
+
+            // 2. Decorate Cake & Show "Happy Birthday" (1.5 seconds later)
+            setTimeout(() => {
+                decorateCake();
+                cakeContainer.style.transform = 'scale(0.95)'; // Slight scale down to fit beautifully on small screens
+                
+                happyBirthdayText.classList.remove('hidden');
+                happyBirthdayText.classList.add('fade-in-up');
+            }, 1000);
+
+            // 3. Show the Quote (3 seconds later)
+            setTimeout(() => {
+                quoteText.classList.remove('hidden');
+                quoteText.classList.add('fade-in-up');
+            }, 3000);
+
+            // 4. Show Countdown (5.5 seconds later)
+            setTimeout(() => {
+                countdownContainer.classList.remove('hidden');
+                countdownContainer.classList.add('fade-in-up');
+                
+                updateCountdown();
+                countdownInterval = setInterval(updateCountdown, 1000);
+                
+                // Automatically scroll down gently on mobile devices to ensure countdown is seen
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 5500);
+        }
+    </script>
+</body>
+</html>
